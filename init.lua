@@ -75,7 +75,7 @@ minetest.register_on_item_eat(function(hp_change, replace_with_item, itemstack, 
     }
 end)
 
-minetest.register_chatcommand("regurgitate", {
+minetest.register_chatcommand("barf", {
     description = "Regurgitates the last food a player has eaten.",
     func = function(name)
         local le = last_eaten[name]
