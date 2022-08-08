@@ -47,6 +47,22 @@ minetest.register_abm({
 	end,
 })
 
+minetest.register_abm({
+    label = "Dried regurgitated food",
+	nodenames = {"regurgitate:regurgitated_food_block_dried"},
+	interval = 2,
+	chance = 8,
+	action = function(pos, node)
+        for _, obj in pairs(minetest.get_objects_inside_radius(pos, 5)) do
+            obj:punch(obj, 0.1, {damage_groups={fleshy=7}})
+            if obj:is_player() then
+                local msg = "Oooh that stinks. That is repulsive. So repulsive it can kill you. Get away from it."
+                minetest.chat_send_player(obj:get_player_name(), msg)
+            end
+        end
+	end,
+})
+
 local last_eaten = {}
 minetest.register_on_item_eat(function(hp_change, replace_with_item, itemstack, user, pointed_thing)
     if itemstack:get_name() == "regurgitate:regurgitated_food" then
@@ -54,6 +70,7 @@ minetest.register_on_item_eat(function(hp_change, replace_with_item, itemstack, 
     end
     local name = user:get_player_name()
     last_eaten[name] = {
+        name = itemstack:get_name(),
         hp_change = hp_change
     }
 end)
@@ -67,7 +84,9 @@ minetest.register_chatcommand("regurgitate", {
         end
         local player = minetest.get_player_by_name(name)
         local inv = player:get_inventory()
+        local le_def = minetest.registered_items[le.name]
         local stack = ItemStack("regurgitate:regurgitated_food")
+        stack:get_meta():set_string("description", "Regurgitated "..(le_def.description or le.name))
         if inv:room_for_item("main", stack) then
             inv:add_item("main", stack)
         else
